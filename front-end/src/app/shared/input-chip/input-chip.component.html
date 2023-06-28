@@ -1,0 +1,29 @@
+<mat-form-field class="chip-list" appearance="fill" [class.textarea]="type === inputType.textarea">
+  <mat-label>{{ inputLabel }}</mat-label>
+
+  <mat-chip-grid #chipGrid aria-label="Enter items">
+    <mat-chip-row
+      *ngFor="let item of items"
+      (removed)="remove(item)"
+      [editable]="true"
+      (edited)="edit(item, $event)"
+      [aria-description]="'press enter to edit ' + item"
+      class="chip-list__item"
+      [class.chip-list__item_warning]="item.type === 'Duplicate'"
+    >
+      {{ item.name }}
+      <button *ngIf="!disableRemove" class="chip-list__item_remove" matChipRemove [attr.aria-label]="'remove ' + item">
+        <mat-icon>cancel</mat-icon>
+      </button>
+    </mat-chip-row>
+
+    <input
+      [placeholder]="placeholder"
+      [disabled]="disable"
+      [matChipInputFor]="chipGrid"
+      [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+      [matChipInputAddOnBlur]="addOnBlur"
+      (matChipInputTokenEnd)="add($event)"
+    />
+  </mat-chip-grid>
+</mat-form-field>

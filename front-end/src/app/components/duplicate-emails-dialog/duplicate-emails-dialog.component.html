@@ -1,0 +1,51 @@
+<div class="duplicate-emails">
+  <div class="duplicate-emails__title">Duplicated Emails Detected!</div>
+  <div class="duplicate-emails__subtitle">{{ genericSubTittleText }}</div>
+
+  <div class="duplicate-emails__emails">
+    <div *ngIf="!!duplicatedNewEmailsCount" class="duplicate-emails__emails__item">
+      <div class="title">{{ subTitleFirstRowText }}</div>
+      <app-input-chip
+        [items]="duplicatedNewEmails"
+        [disable]="disabledInput"
+        [disableRemove]="disableRemove"
+        [placeholder]="placeholder"
+        inputLabel="Enter emails"
+        class="duplicate-emails__emails__item"
+      ></app-input-chip>
+    </div>
+
+    <div *ngIf="!!duplicatedExistingEmailsCount" class="duplicate-emails__emails__item">
+      <div class="title">{{ subTitleSecondRowText }}</div>
+      <app-input-chip
+        [items]="duplicatedExistingEmails"
+        [disable]="disabledInput"
+        [disableRemove]="disableRemove"
+        [placeholder]="placeholder"
+        inputLabel="Enter emails"
+        class="duplicate-emails__emails__item"
+        [type]="inputType.textarea"
+      ></app-input-chip>
+    </div>
+  </div>
+
+  <div class="duplicate-emails__message">
+    <div class="duplicate-emails__message__item">
+      <mat-icon matListItemIcon>info</mat-icon>
+    </div>
+    <div class="duplicate-emails__message__item">
+      If an email appears in a project more than once, the user will be given additional test attempts.
+    </div>
+  </div>
+
+  <div class="duplicate-emails__subtitle">How would you like to proceed?</div>
+
+  <div class="duplicate-emails__checkbox">
+    <mat-checkbox [formControl]="checkbox" [disableRipple]="true">Save all (duplicated and existing)</mat-checkbox>
+  </div>
+
+  <div class="duplicate-emails__footer">
+    <button  mat-stroked-button class="btn btn_cancel" (click)="closeDialog()">Cancel</button>
+    <button mat-flat-button color="primary" class="btn" (click)="closeDialog(true)">{{ submitText }}</button>
+  </div>
+</div>

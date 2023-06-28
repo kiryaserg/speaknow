@@ -1,0 +1,26 @@
+<div class="emails">
+  <div class="emails-container">
+    <div class="emails-existing-list">
+      <mat-list>
+        <div mat-subheader>Existing emails</div>
+        <mat-list-item *ngFor="let email of existingEmails">
+          <mat-icon matListItemIcon>settings</mat-icon>
+          <div matListItemTitle>{{email.name}}</div>
+        </mat-list-item>
+      </mat-list>
+    </div>
+
+    <div class="emails-entering">
+      <div class="emails__title">Emails List</div>
+      <app-input-chip
+        [items]="emails"
+        inputLabel="Enter emails"
+        placeholder="New email ..."
+        (itemsWasChangedEvent)="recalculateDuplicates($event)"
+      ></app-input-chip>
+      <div class="emails-entering__actions">
+        <button mat-flat-button color="primary" class="btn" [disabled]="disableSubmit" (click)="submit()">Save Users</button>
+      </div>
+    </div>
+  </div>
+</div>

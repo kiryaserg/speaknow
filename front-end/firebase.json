@@ -1,0 +1,10 @@
+{
+  "hosting": {
+    "public": "dist/speak-now-test-task",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ]
+  }
+}

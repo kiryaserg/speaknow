@@ -1,0 +1,39 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+.chip-list {
+  width: 100%;
+  max-height: 200px;
+  overflow-y: auto;
+
+  .chip-list__item {
+    background: #E1E3E5;
+    padding-right: 10px;
+    color: #6C6E7E;
+    border-radius: 4px;
+
+    &:hover {
+      padding-right: 0;
+
+      .chip-list__item_remove {
+        display: block;
+      }
+    }
+
+    &_remove {
+      display: none;
+    }
+
+    &_warning {
+      background: #FFF5DE;
+      color: #ECB62D;
+    }
+  }
+}
+
+.textarea {
+  height: 200px;
+  overflow: auto;
+}

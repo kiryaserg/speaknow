@@ -1,0 +1,24 @@
+{
+  "name": "test-case",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "lint": "tslint -p tsconfig.json -c tslint.json",
+    "local": "serverless offline",
+    "format": "prettier --write \"**/*.ts\""
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "aws-lambda": "^1.0.7",
+    "aws-sdk": "^2.1390.0",
+    "dynamoose": "^3.2.0",
+    "serverless": "^3.32.2",
+    "serverless-offline": "^11.1.2",
+    "serverless-plugin-scripts": "^1.0.2"
+  },
+  "devDependencies": {
+    "serverless-step-functions": "^3.13.1"
+  }
+}

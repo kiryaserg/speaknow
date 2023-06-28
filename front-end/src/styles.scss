@@ -1,0 +1,39 @@
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap');
+
+html, body { height: 100%; }
+body {
+  margin: 0;
+  font-family: 'Lato', sans-serif;
+}
+
+// Override the default material styles
+.mat-mdc-text-field-wrapper {
+  background: #FAFAFA;
+  border-radius: 8px !important;
+  overflow: auto !important;
+
+  &:hover {
+    background: #FAFAFA !important;
+  }
+}
+
+.mdc-line-ripple {
+  opacity: 0;
+}
+
+.mdc-floating-label {
+  display: none;
+}
+
+.mat-mdc-text-field-wrapper:not(.mdc-text-field--outlined) .mat-mdc-form-field-infix {
+  padding-top: 8px;
+}
+
+.mat-mdc-checkbox.mat-accent .mdc-checkbox--selected~.mdc-checkbox__ripple {
+  background-color: #5061D0;
+}
+
+.mat-mdc-checkbox .mdc-checkbox .mdc-checkbox__native-control:enabled:checked~.mdc-checkbox__background, .mat-mdc-checkbox .mdc-checkbox .mdc-checkbox__native-control:enabled:indeterminate~.mdc-checkbox__background, .mat-mdc-checkbox .mdc-checkbox .mdc-checkbox__native-control[data-indeterminate=true]:enabled~.mdc-checkbox__background {
+  border-color: #5061D0 !important;
+  background-color: #5061D0 !important;
+}

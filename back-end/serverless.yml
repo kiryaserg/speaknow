@@ -1,0 +1,173 @@
+service: candidate-task-backend
+plugins:
+  - serverless-plugin-scripts
+  - serverless-step-functions
+provider:
+  name: aws
+  runtime: nodejs14.x
+  region: us-east-1
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - sns:Publish
+      Resource: arn:aws:sns:us-east-1:318153063077:sms
+    - Effect: Allow
+      Action:
+        - lambda:InvokeFunction
+      Resource: "*"
+    - Effect: Allow
+      Action:
+        - states:StartExecution
+      Resource: arn:aws:states:us-east-1:318153063077:stateMachine:MyStateMachine
+    - Effect: Allow
+      Action:
+        - lambda:InvokeFunction
+      Resource:
+        - arn:aws:lambda:us-east-1:318153063077:function:candidate-task-backend-prod-sendSmsToCandidate
+    - Effect: Allow
+      Action:
+        - dynamodb:DescribeStream
+        - dynamodb:GetRecords
+        - dynamodb:GetShardIterator
+        - dynamodb:ListStreams
+      Resource:
+        - "arn:aws:dynamodb:us-east-1:318153063077:table/assessments/stream/*" 
+    - Effect: Allow
+      Action: 
+        - dynamodb:Scan
+      Resource: 
+        - "arn:aws:dynamodb:us-east-1:318153063077:table/candidates"
+  environment:
+    env: ${self:custom.env}
+    region: ${opt:region, self:provider.region}
+    ASSESSMENT_DYNAMO_TABLE: assessments
+    CANDIDATES_DYNAMO_TABLE: candidates
+    SNS_TOPIC_ARN: arn:aws:sns:us-east-1:318153063077:my-topic
+custom:
+  env: ${opt:stage, self:provider.stage}
+  stateMachineArn: arn:aws:states:us-east-1:318153063077:stateMachine:MyStateMachine
+  region: us-east-1
+  custom:
+functions:
+  addDataToStateMachine:
+    handler: src/handlers/add-data-to-step-function.handler
+    events:
+      - http:
+          path: create-user
+          method: post
+          authorizer:
+            type: aws_iam
+      - stream:
+          type: dynamodb
+          arn:
+            Fn::GetAtt: [AssessmentsDynamoDbTable, StreamArn]
+  getCandidateByEmail:
+    handler: src/handlers/get-candidate-by-email-function.handler
+    events:
+      - http:
+          path: create-user
+          method: get
+          authorizer:
+            type: aws_iam
+  sendSmsToCandidate:
+    handler: src/handlers/send-sms-to-candidate-function.handler
+    events:
+      - http:
+          path: send-sms
+          method: post
+          authorizer:
+            type: aws_iam
+stepFunctions:
+  stateMachines:
+    myStateMachine:
+      name: MyStateMachine
+      role: arn:aws:iam::318153063077:role/service-role/StepFunctions-MyStateMachine-role-d2f61229
+      definition:
+        StartAt: SaveEvent
+        States:
+          SaveEvent:
+            Type: Task
+            Resource: arn:aws:lambda:us-east-1:318153063077:function:candidate-task-backend-prod-addDataToStateMachine
+            ResultPath: "$.stateMachineData"
+            Next: WaitFor5Minutes
+          WaitFor5Minutes:
+            Type: Wait
+            Seconds: 300
+            Next: InvokeOtherLambda
+          InvokeOtherLambda:
+            Type: Task
+            Resource: arn:aws:lambda:us-east-1:318153063077:function:candidate-task-backend-prod-getCandidateByEmail
+            InputPath: "$.stateMachineData"
+            ResultPath: "$.candidateData"
+            Next: SendSmsToCandidate
+          SendSmsToCandidate:
+            Type: Task
+            Resource: arn:aws:lambda:us-east-1:318153063077:function:candidate-task-backend-prod-sendSmsToCandidate
+            InputPath: "$.candidateData"
+            End: true         
+resources:
+  Resources:
+    AssessmentsDynamoDbTable:
+      Type: 'AWS::DynamoDB::Table'
+      DeletionPolicy: Retain
+      Properties:
+        TableName: assessments
+        BillingMode: PAY_PER_REQUEST
+        StreamSpecification:
+          StreamViewType: NEW_AND_OLD_IMAGES
+        AttributeDefinitions:
+          - AttributeName: company
+            AttributeType: S
+          - AttributeName: project_assessmentId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: company
+            KeyType: HASH
+          - AttributeName: project_assessmentId
+            KeyType: RANGE
+    CandidatesDynamoDbTable:
+      Type: 'AWS::DynamoDB::Table'
+      DeletionPolicy: Retain
+      Properties:
+        TableName: candidates
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: candidateId
+            AttributeType: S
+          - AttributeName: candidateEmail
+            AttributeType: S
+        KeySchema:
+          - AttributeName: candidateId
+            KeyType: HASH
+          - AttributeName: candidateEmail
+            KeyType: RANGE
+    StateMachineRole:
+      Type: AWS::IAM::Role
+      Properties:
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service: states.amazonaws.com
+              Action: sts:AssumeRole
+        Policies:
+          - PolicyName: stateMachinePolicy
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - lambda:InvokeFunction
+                  Resource:
+                    - arn:aws:lambda:us-east-1:318153063077:function:candidate-task-backend-prod-sendSmsToCandidate
+          - PolicyName: stateMachineLoggingPolicy
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - logs:CreateLogGroup
+                    - logs:CreateLogStream
+                    - logs:PutLogEvents
+                  Resource: "*"
